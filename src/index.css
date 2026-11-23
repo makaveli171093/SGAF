@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #1b5146;
+  --color-brand-hover: #2a6b5d;
+
+  --color-accent: #b68a3d;
+  --color-accent-soft: #f6f0e2;
+
+  --color-canvas: #f5f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #293b35;
+  --color-border: #e4e8e1;
+
+  --color-success: #28735a;
+  --color-success-soft: #eaf4ed;
+
+  --color-warning: #a97524;
+  --color-warning-soft: #fff7e8;
+
+  --color-danger: #b64848;
+  --color-danger-soft: #fff1f0;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    min-width: 320px;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: system-ui, sans-serif;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+ .btn-primary { @apply rounded-lg bg-brand px-4 py-2 font-semibold text-white hover:bg-brand-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50; }
+ .btn-secondary { @apply rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-brand hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-50; }
+ .form-field { @apply mt-2 w-full rounded-lg border border-border bg-surface p-3 focus:border-brand focus:outline-2 focus:outline-brand; }
+}
+@media print { aside, header, nav, button, form, .no-print { display:none !important; } main { max-width:none !important; padding:0 !important; } body { background:white; } article, table { break-inside:avoid; } }
+
+@keyframes skeleton-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+.skeleton { background: linear-gradient(100deg,#e4e8e1 20%,#f5f6f2 40%,#e4e8e1 60%); background-size:200% 100%; animation:skeleton-shimmer 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation:none; } }
