@@ -40,3 +40,11 @@ Consulta [la guía de revisión UX](docs/MEJORAS_UX_MAIN.md) para validar los fl
 Repositorio: https://github.com/makaveli171093/SGAF
 
 Configura las variables de entorno antes de compilar para un alojamiento web. `vercel.json` incluye la configuración del proyecto. Este repositorio contiene el frontend; no incluye un backend ni credenciales. No se versionan dependencias, compilados, archivos de entorno locales ni el ZIP original.
+
+## Diseño editorial
+
+La interfaz utiliza una barra lateral azul tinta, superficies marfil, títulos editoriales y acentos terracota. El inicio combina el resumen real de la API, accesos por rol y el horario semanal de períodos activos. En móvil, el menú se despliega con un botón y el mapa se convierte en una lista de accesos.
+
+El mapa es navegación entre módulos de SGAF; no representa relaciones académicas calculadas. No se incorporan las estadísticas, observaciones ni actividades ficticias del prototipo visual. La identidad permanece como NEXORA.
+
+La configuración local utilizada para esta integración apunta a `https://sgaf-backend.onrender.com/api/v1`. En un alojamiento web, establece esa misma URL en `VITE_API_URL` antes de compilar si deseas consumir Render.
