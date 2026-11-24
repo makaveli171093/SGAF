@@ -97,7 +97,7 @@ export default function GroupsPage() {
         </p>
       )}
 
-      {isLoading && (
+      {isLoading && groups.length === 0 && (
         <p
           role="status"
           className="rounded-xl border border-border bg-surface p-6"

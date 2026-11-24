@@ -4,12 +4,16 @@ type Toast = { id: number; kind: ToastKind; text: string };
 export default function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const counter = useRef(0);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
   const notify = useCallback((text: string, kind: ToastKind = "info") => {
     const id = ++counter.current;
     setToasts(current => [...current, { id, kind, text }].slice(-3));
-    timers.current.push(setTimeout(() => setToasts(current => current.filter(t => t.id !== id)), 5000));
+    const timer = setTimeout(() => {
+      setToasts(current => current.filter(t => t.id !== id));
+      timers.current.delete(timer);
+    }, 5000);
+    timers.current.add(timer);
   }, []);
   return <ToastContext.Provider value={notify}>
     {children}

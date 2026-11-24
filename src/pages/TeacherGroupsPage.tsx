@@ -60,7 +60,7 @@ export default function TeacherGroupsPage() {
         </button>
       </div>
 
-      {isLoading && <Skeleton lines={2} />}
+      {isLoading && groups.length === 0 && <Skeleton lines={2} />}
 
       {!isLoading && error && (
         <div role="alert" className="rounded-xl bg-danger-soft p-6 text-danger">
@@ -87,7 +87,7 @@ export default function TeacherGroupsPage() {
         </p>
       )}
 
-      {!isLoading && !error && groups.length > 0 && (
+      {groups.length > 0 && (
         <div className="grid gap-5 xl:grid-cols-2">
           {groups.map((group) => (
             <article

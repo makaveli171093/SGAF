@@ -1,11 +1,17 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { getApiErrorMessage } from "../lib/apiError";
 import { useAuthStore } from "../stores/authStore";
 
+import { RefreshContext } from "../lib/refreshContext";
+
 type QueryLoader<T> = (accessToken: string, signal: AbortSignal) => Promise<T>;
 
-export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
+export function useAuthenticatedQuery<T>(
+  load: QueryLoader<T>,
+  keepPreviousData = false,
+) {
+  const refreshVersion = useContext(RefreshContext);
   const accessToken = useAuthStore((state) => state.accessToken);
   const logout = useAuthStore((state) => state.logout);
 
@@ -13,6 +19,7 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
     loader: QueryLoader<T>;
     token: string;
     version: number;
+    refreshVersion: number;
     data: T | null;
     error: string | null;
   } | null>(null);
@@ -35,6 +42,7 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
           loader: load,
           token,
           version: requestVersion,
+          refreshVersion,
           data,
           error: null,
         });
@@ -47,13 +55,18 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
           return;
         }
 
-        setResult({
+        setResult((previous) => ({
           loader: load,
           token,
           version: requestVersion,
-          data: null,
+          refreshVersion,
+          data:
+            previous?.token === token &&
+            (keepPreviousData || previous.loader === load)
+              ? previous.data
+              : null,
           error: getApiErrorMessage(error),
-        });
+        }));
       }
     }
 
@@ -62,7 +75,14 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
     return () => {
       controller.abort();
     };
-  }, [accessToken, logout, load, requestVersion]);
+  }, [
+    accessToken,
+    logout,
+    load,
+    requestVersion,
+    refreshVersion,
+    keepPreviousData,
+  ]);
 
   function reload() {
     setRequestVersion((current) => current + 1);
@@ -75,6 +95,7 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
         current.loader !== load ||
         current.token !== accessToken ||
         current.version !== requestVersion ||
+        current.refreshVersion !== refreshVersion ||
         current.data === null
       ) {
         return current;
@@ -88,10 +109,17 @@ export function useAuthenticatedQuery<T>(load: QueryLoader<T>) {
   }
 
   const isCurrentResult =
-    result?.token === accessToken && result?.loader === load && result?.version === requestVersion;
+    result?.token === accessToken &&
+    result?.loader === load &&
+    result?.version === requestVersion &&
+    result.refreshVersion === refreshVersion;
 
   return {
-    data: isCurrentResult ? result.data : null,
+    data:
+      result?.token === accessToken &&
+      (keepPreviousData || result.loader === load)
+        ? result.data
+        : null,
     error: isCurrentResult ? result.error : null,
     isLoading: Boolean(accessToken) && !isCurrentResult,
     reload,

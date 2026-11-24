@@ -1,10 +1,12 @@
 import axios from "axios";
+import { ApiContractError } from "./apiContracts";
 
 interface ApiErrorResponse {
   message?: string | string[];
 }
 
 export function getApiErrorMessage(error: unknown): string {
+  if (error instanceof ApiContractError) return error.message;
   if (!axios.isAxiosError<ApiErrorResponse>(error)) {
     return "Ocurrió un error inesperado. Intenta nuevamente.";
   }

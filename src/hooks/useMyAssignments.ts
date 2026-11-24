@@ -1,93 +1,42 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { getApiErrorMessage } from "../lib/apiError";
+import { useCallback } from "react";
+import { useAuthenticatedQuery } from "./useAuthenticatedQuery";
 import { assignmentsService } from "../services/assignments";
-import { useAuthStore } from "../stores/authStore";
-import type {
-  StudentAssignment,
-  StudentSubmission,
-} from "../types/assignments";
-
-export function useMyAssignments() {
-  const accessToken = useAuthStore((state) => state.accessToken);
-  const logout = useAuthStore((state) => state.logout);
-
-  const [assignments, setAssignments] = useState<StudentAssignment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [checkedAt, setCheckedAt] = useState(0);
-  const [requestVersion, setRequestVersion] = useState(0);
-  const [dataToken, setDataToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!accessToken) return;
-
-    const controller = new AbortController();
-
-    async function loadAssignments(token: string) {
-      try {
-        const response = await assignmentsService.getMine(
-          token,
-          controller.signal,
-        );
-
-        if (controller.signal.aborted) return;
-        if (useAuthStore.getState().accessToken !== token) return;
-
-        setAssignments(response.assignments);
-        setDataToken(token);
-        setError(null);
-        setCheckedAt(Date.now());
-      } catch (error: unknown) {
-        if (controller.signal.aborted) return;
-        if (useAuthStore.getState().accessToken !== token) return;
-
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          logout();
-          return;
-        }
-
-        setError(getApiErrorMessage(error));
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadAssignments(accessToken);
-
-    return () => {
-      controller.abort();
-    };
-  }, [accessToken, logout, requestVersion]);
-
-  function reload() {
-    setIsLoading(true);
-    setError(null);
-
-    setRequestVersion((current) => current + 1);
-  }
-
+import type { TaskQuery, StudentSubmission } from "../types/assignments";
+export function useMyAssignments(params: TaskQuery = {}) {
+  const { page, pageSize, q, group, status, order } = params;
+  const load = useCallback(
+    async (token: string, signal: AbortSignal) => ({
+      ...(await assignmentsService.getMine(token, signal, {
+        page,
+        pageSize,
+        q,
+        group,
+        status,
+        order,
+      })),
+      checkedAt: Date.now(),
+    }),
+    [page, pageSize, q, group, status, order],
+  );
+  const query = useAuthenticatedQuery(load, true);
   function registerSubmission(
     assignmentId: string,
     submission: StudentSubmission,
   ) {
-    setAssignments((current) =>
-      current.map((assignment) =>
-        assignment.id === assignmentId
-          ? { ...assignment, submissions: [submission] }
-          : assignment,
+    query.updateData((current) => ({
+      ...current,
+      assignments: current.assignments.map((a) =>
+        a.id === assignmentId ? { ...a, submissions: [submission] } : a,
       ),
-    );
+    }));
+    query.reload();
   }
-
   return {
-    assignments: dataToken === accessToken ? assignments : [],
-    isLoading,
-    error,
-    checkedAt,
-    reload,
+    ...query,
+    assignments: query.data?.assignments ?? [],
+    checkedAt: query.data?.checkedAt ?? 0,
+    pagination: query.data?.pagination,
+    filters: query.data?.filters,
     registerSubmission,
   };
 }

@@ -17,7 +17,8 @@ export const assignmentSchema = z.object({
 
       const timestamp = new Date(`${value}:00-04:00`).getTime();
 
-      return Number.isFinite(timestamp) && timestamp > Date.now();
+      const parsed = new Date(`${value}:00Z`);
+      return Number.isFinite(timestamp) && Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 16) === value && timestamp > Date.now();
     }, "La fecha y hora deben ser posteriores al momento actual"),
 });
 
