@@ -67,7 +67,7 @@ export default function PublicHomePage() {
         Saltar al contenido
       </a>
 
-      <header className="border-b border-border bg-surface">
+      <header className="sticky top-0 z-30 border-b border-border bg-surface">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-5 px-5 py-5 sm:px-8">
           <Link to="/" aria-label="NEXORA, inicio">
             <NexoraLogo />

@@ -1,6 +1,7 @@
 import { api } from "../lib/axios";
+import { studentPage, teacherPage } from "../lib/legacyPagination";
 import type {
-  MyAssignmentsResponse,
+  MyAssignmentsResponse, TaskQuery,
   TeacherAssignmentsResponse,
 } from "../types/assignments";
 
@@ -24,6 +25,7 @@ export const assignmentsService = {
   async getMine(
     accessToken: string,
     signal: AbortSignal,
+    params: TaskQuery = {},
   ): Promise<MyAssignmentsResponse> {
     const response = await api.get<MyAssignmentsResponse>(
       "/assignments/my-assignments",
@@ -31,11 +33,11 @@ export const assignmentsService = {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-        signal,
+        signal, params,
       },
     );
 
-    return response.data;
+    return studentPage(response.data, params);
   },
   async create(
     accessToken: string,
@@ -56,6 +58,7 @@ export const assignmentsService = {
   async getTeacherAssignments(
     accessToken: string,
     signal: AbortSignal,
+    params: TaskQuery = {},
   ): Promise<TeacherAssignmentsResponse> {
     const response = await api.get<TeacherAssignmentsResponse>(
       "/assignments/teacher",
@@ -63,10 +66,10 @@ export const assignmentsService = {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-        signal,
+        signal, params,
       },
     );
 
-    return response.data;
+    return teacherPage(response.data, params);
   },
 };

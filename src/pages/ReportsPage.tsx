@@ -174,7 +174,7 @@ export default function ReportsPage() {
                   <Bar
                     dataKey="amount"
                     name="Ingresos Bs"
-                    fill="#1b5146"
+                    fill="var(--color-brand)"
                     radius={[5, 5, 0, 0]}
                     isAnimationActive={false}
                   />

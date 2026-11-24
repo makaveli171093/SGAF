@@ -1,3 +1,4 @@
+import { useNow } from "../hooks/useNow";
 import PaymentAttempts from "../components/payments/PaymentAttempts";
 import { useState } from "react";
 import { useAuthenticatedQuery } from "../hooks/useAuthenticatedQuery";
@@ -20,6 +21,7 @@ function normalizeSearch(value: string): string {
 }
 
 export default function PendingObligationsPage() {
+  const now = useNow();
   const [search, setSearch] = useState("");
 
   const { data, isLoading, error, reload } = useAuthenticatedQuery(
@@ -132,7 +134,7 @@ export default function PendingObligationsPage() {
           ) : (
             <div className="space-y-5">
               {filteredObligations.map((obligation) => {
-                const status = getObligationStatus(obligation, data.checkedAt);
+                const status = getObligationStatus(obligation, now);
 
                 return (
                   <article

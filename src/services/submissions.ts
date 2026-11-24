@@ -1,6 +1,7 @@
 import { api } from "../lib/axios";
+import { submissionPage } from "../lib/legacyPagination";
 import type {
-  StudentSubmission,
+  StudentSubmission, TaskQuery,
   AssignmentSubmissionsResponse,
 } from "../types/assignments";
 
@@ -46,6 +47,7 @@ export const submissionsService = {
     accessToken: string,
     assignmentId: string,
     signal: AbortSignal,
+    params: TaskQuery = {},
   ): Promise<AssignmentSubmissionsResponse> {
     const response = await api.get<AssignmentSubmissionsResponse>(
       `/submissions/assignment/${encodeURIComponent(assignmentId)}`,
@@ -53,11 +55,11 @@ export const submissionsService = {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-        signal,
+        signal, params,
       },
     );
 
-    return response.data;
+    return submissionPage(response.data, params);
   },
   async grade(
     accessToken: string,

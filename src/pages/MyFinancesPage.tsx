@@ -1,3 +1,4 @@
+import { useNow } from "../hooks/useNow";
 import { useFinancialHistory } from "../hooks/useFinancialHistory";
 import {
   formatAmount,
@@ -17,6 +18,7 @@ const onlinePaymentsEnabled =
 export default function MyFinancesPage() {
   const user = useAuthStore((state) => state.user);
 
+  const now = useNow();
   const { obligations, isLoading, error, checkedAt, reload } =
     useFinancialHistory();
 
@@ -46,7 +48,7 @@ export default function MyFinancesPage() {
         </button>
       </div>
 
-      {isLoading && (
+      {isLoading && obligations.length === 0 && (
         <p
           role="status"
           className="rounded-xl border border-border bg-surface p-6"
@@ -71,7 +73,7 @@ export default function MyFinancesPage() {
         </div>
       )}
 
-      {!isLoading && !error && (
+      {((!isLoading && !error) || obligations.length > 0) && (
         <>
           {user?.status === "SUSPEND_FOR_DEBT" && (
             <div
@@ -104,7 +106,7 @@ export default function MyFinancesPage() {
           ) : (
             <div className="space-y-5">
               {obligations.map((obligation) => {
-                const status = getObligationStatus(obligation, checkedAt);
+                const status = getObligationStatus(obligation, now);
 
                 return (
                   <article

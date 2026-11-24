@@ -34,7 +34,9 @@ export interface StudentAssignment {
   submissions: StudentSubmission[];
 }
 
-export interface MyAssignmentsResponse {
+export interface TaskQuery { page?: number; pageSize?: number; q?: string; group?: string; period?: string; status?: string; order?: string; }
+export interface PageInfo { pagination?: { total: number; page: number; pageSize: number }; filters?: { groups: {id:string;label:string}[]; periods?: string[] }; pending?: number; }
+export interface MyAssignmentsResponse extends PageInfo {
   message: string;
   assignments: StudentAssignment[];
 }
@@ -62,7 +64,7 @@ export interface TeacherAssignment {
   };
 }
 
-export interface TeacherAssignmentsResponse {
+export interface TeacherAssignmentsResponse extends PageInfo {
   message: string;
   assignments: TeacherAssignment[];
 }
@@ -78,7 +80,7 @@ export interface TeacherSubmission extends StudentSubmission {
   };
 }
 
-export interface AssignmentSubmissionsResponse {
+export interface AssignmentSubmissionsResponse extends PageInfo {
   message: string;
   submissions: TeacherSubmission[];
 }
